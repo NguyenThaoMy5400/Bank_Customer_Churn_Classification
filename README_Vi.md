@@ -17,8 +17,7 @@ Phiên bản notebook hiện tại tập trung vào:
 - xử lý mất cân bằng bằng `RandomOverSampler` trong `ImbPipeline`;
 - tối ưu siêu tham số bằng `GridSearchCV`;
 - so sánh mô hình theo các chỉ số trên tập test;
-- chọn mô hình tốt nhất theo ưu tiên `Recall`, sau đó `F1-score`;
-- phân tích `Feature Importance` của mô hình tốt nhất.
+- chọn mô hình tốt nhất theo ưu tiên `Recall`, sau đó `F1-score`.
 
 ## 2. Dữ liệu sử dụng
 
@@ -84,8 +83,8 @@ Kết quả trong notebook:
 12. Đánh giá các mô hình tuned trên tập test.
 13. Chọn mô hình tốt nhất theo `Recall`, rồi `F1-score`.
 14. Vẽ `Confusion Matrix` và `ROC Curve`.
-15. Phân tích `Feature Importance` của mô hình tốt nhất.
-16. Xuất bảng kết quả cuối ra CSV.
+15. Xuất bảng kết quả cuối ra CSV.
+16. Tổng kết nhận xét, hạn chế và hướng phát triển.
 
 ## 4. Cách tải dữ liệu trong notebook
 
@@ -185,7 +184,7 @@ Biến số:
 - `NumOfProducts`
 - `EstimatedSalary`
 
-Đây là thay đổi quan trọng cần phản ánh đúng: `HasCrCard` và `IsActiveMember` hiện đã được đưa sang nhóm biến phân loại và sẽ được `OneHotEncoder` xử lý.
+Đây là thay đổi quan trọng cần phản ánh đúng: `HasCrCard` và `IsActiveMember` hiện được đưa sang nhóm biến phân loại và được `OneHotEncoder` xử lý.
 
 ### 6.4. `ColumnTransformer`
 
@@ -237,7 +236,11 @@ Tất cả mô hình tuned đều dùng cấu trúc:
 preprocessor -> RandomOverSampler -> model
 ```
 
-Cách này giúp oversampling chỉ xảy ra trong quy trình train/CV, giảm nguy cơ leakage sang validation hoặc test.
+Cách này giúp:
+
+- preprocessing chỉ được fit trên dữ liệu train trong từng fold;
+- oversampling chỉ áp dụng lên phần train của từng fold;
+- tránh rò rỉ dữ liệu từ validation/test vào quá trình huấn luyện.
 
 ## 9. Tối ưu siêu tham số với GridSearchCV
 
@@ -322,22 +325,9 @@ Kết quả đang lưu trong notebook:
 - lớp `0`: precision `0.93`, recall `0.81`, f1-score `0.87`
 - lớp `1`: precision `0.51`, recall `0.77`, f1-score `0.61`
 - accuracy tổng thể: `0.80`
+- weighted avg: precision `0.85`, recall `0.80`, f1-score `0.82`
 
-## 12. Feature Importance
-
-Notebook hiện có thêm phần phân tích `Feature Importance` của mô hình tốt nhất.
-
-Top feature theo output hiện tại:
-
-1. `Age` - `0.432889`
-2. `NumOfProducts` - `0.316866`
-3. `Balance` - `0.067476`
-4. `Geography_Germany` - `0.061781`
-5. `IsActiveMember_0` - `0.051158`
-
-Đây là thay đổi lớn so với README cũ: notebook hiện có bước giải thích mô hình ở mức cơ bản.
-
-## 13. File đầu ra hiện tại
+## 12. File đầu ra hiện tại
 
 Notebook hiện xuất trực tiếp file:
 
@@ -355,9 +345,7 @@ Ngoài ra còn sinh thêm:
 
 - `bank_customer_churn_eda_report.html`
 
-Lưu ý: tên file output trong notebook hiện là `gridsearch_model_results.csv`, không phải tên cũ khác.
-
-## 14. Thư viện sử dụng
+## 13. Thư viện sử dụng
 
 Notebook cài:
 
@@ -378,14 +366,15 @@ Các thư viện chính được import gồm:
 
 Lưu ý: `xgboost` đang được cài/import nhưng phiên bản notebook hiện tại không huấn luyện mô hình XGBoost.
 
-## 15. Hạn chế hiện tại
+## 14. Hạn chế hiện tại
 
 - Notebook đang phụ thuộc vào Google Colab qua `drive.mount()` và `files.download()`.
 - Phiên bản hiện tại bỏ phần baseline, đi thẳng vào `GridSearchCV`.
 - `RandomOverSampler` có thể làm tăng overfitting do nhân bản mẫu lớp thiểu số.
 - Mô hình vẫn dùng ngưỡng phân loại mặc định `0.5`.
+- Phiên bản notebook hiện tại không còn phần `Feature Importance`.
 
-## 16. Cách chạy local
+## 15. Cách chạy local
 
 Nếu chạy ngoài Colab, nên đổi phần đọc dữ liệu thành:
 
@@ -402,6 +391,13 @@ from google.colab import drive, files
 drive.mount('/content/drive')
 files.download(...)
 ```
+
+## 16. Hướng phát triển
+
+- So sánh thêm giữa không oversampling, `RandomOverSampler`, SMOTE và `class_weight`.
+- Tối ưu threshold thay vì dùng ngưỡng mặc định `0.5`.
+- Thử thêm các mô hình nâng cao như LightGBM, CatBoost.
+- Triển khai mô hình thành một ứng dụng dự đoán churn đơn giản.
 
 ## 17. Tác giả
 

@@ -17,8 +17,7 @@ The current notebook focuses on:
 - class imbalance handling with `RandomOverSampler` inside `ImbPipeline`;
 - hyperparameter tuning with `GridSearchCV`;
 - model comparison using test-set metrics;
-- best-model selection with priority on `Recall`, then `F1-score`;
-- feature-importance analysis for the selected model.
+- best-model selection with priority on `Recall`, then `F1-score`.
 
 ## Dataset
 
@@ -84,8 +83,8 @@ Notebook output shows:
 12. Evaluate tuned models on the test set.
 13. Select the best model by `Recall`, then `F1-score`.
 14. Plot confusion matrix and ROC curve.
-15. Analyze feature importance of the best model.
-16. Export final comparison results to CSV.
+15. Export final comparison results to CSV.
+16. Summarize findings and limitations in the conclusion.
 
 ## Data Loading
 
@@ -185,7 +184,7 @@ Numeric features:
 - `NumOfProducts`
 - `EstimatedSalary`
 
-This is an important change from earlier versions: `HasCrCard` and `IsActiveMember` are now treated as categorical features and one-hot encoded.
+This is an important change from earlier versions: `HasCrCard` and `IsActiveMember` are treated as categorical features and one-hot encoded.
 
 ### Transformer setup
 
@@ -256,6 +255,12 @@ Optimization metric:
 scoring="recall"
 ```
 
+The notebook also explains why this pipeline design is used:
+
+- preprocessing is fit only on the training data in each fold;
+- oversampling is applied only to the training portion of each fold;
+- validation/test leakage is avoided.
+
 ### Best hyperparameters from the notebook output
 
 #### Logistic Regression
@@ -316,20 +321,7 @@ Classification report stored in the notebook:
 - class `0`: precision `0.93`, recall `0.81`, f1-score `0.87`
 - class `1`: precision `0.51`, recall `0.77`, f1-score `0.61`
 - overall accuracy: `0.80`
-
-## Feature Importance
-
-The notebook includes a feature-importance section for the selected best model.
-
-Top features shown in the stored output:
-
-1. `Age` - `0.432889`
-2. `NumOfProducts` - `0.316866`
-3. `Balance` - `0.067476`
-4. `Geography_Germany` - `0.061781`
-5. `IsActiveMember_0` - `0.051158`
-
-This is another change from the older README: feature-importance analysis is now part of the notebook workflow.
+- weighted average: precision `0.85`, recall `0.80`, f1-score `0.82`
 
 ## Output Files
 
@@ -376,6 +368,7 @@ Note: `xgboost` is installed/imported, but the current notebook version does not
 - It does not include a baseline-training section anymore; it goes directly to `GridSearchCV`.
 - `RandomOverSampler` may increase overfitting risk because it duplicates minority samples.
 - The classification threshold is still the default `0.5`.
+- The current notebook no longer includes a feature-importance section.
 
 ## How to Run Locally
 
@@ -394,6 +387,13 @@ from google.colab import drive, files
 drive.mount('/content/drive')
 files.download(...)
 ```
+
+## Possible Extensions
+
+- compare no oversampling, `RandomOverSampler`, SMOTE, and `class_weight`;
+- optimize the classification threshold;
+- try additional boosted-tree models such as LightGBM or CatBoost;
+- deploy the model in a simple churn prediction application.
 
 ## Author
 
