@@ -150,8 +150,6 @@ profile = ProfileReport(
 profile.to_file("bank_customer_churn_eda_report.html")
 ```
 
-Đây là điểm khác so với README cũ: notebook hiện không chỉ có EDA thủ công mà còn có báo cáo EDA tự động.
-
 ## 6. Tiền xử lý dữ liệu
 
 ### 6.1. Loại bỏ cột không cần thiết
