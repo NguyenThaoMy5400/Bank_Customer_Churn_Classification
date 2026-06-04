@@ -1,28 +1,26 @@
-# 🏦 Bank Customer Churn Classification
+﻿# Bank Customer Churn Classification
 
-## 📌 Project Overview
+## Project Overview
 
-This project builds a **binary classification model** to predict whether a bank customer is likely to leave the bank (customer churn).
+This project builds a binary classification system to predict whether a bank customer will leave the bank.
 
-The target variable is:
+Target variable:
 
-- `Exited = 0` → Customer stays with the bank
-- `Exited = 1` → Customer leaves the bank
+- `Exited = 0`: customer stays
+- `Exited = 1`: customer leaves
 
-The primary business objective is to identify customers at risk of churn early so that the bank can implement retention strategies and reduce customer loss.
+The current notebook focuses on:
 
-The notebook covers:
+- exploratory data analysis (EDA);
+- automated EDA reporting with `ydata_profiling`;
+- preprocessing with `ColumnTransformer` and `Pipeline`;
+- class imbalance handling with `RandomOverSampler` inside `ImbPipeline`;
+- hyperparameter tuning with `GridSearchCV`;
+- model comparison using test-set metrics;
+- best-model selection with priority on `Recall`, then `F1-score`;
+- feature-importance analysis for the selected model.
 
-- Exploratory Data Analysis (EDA)
-- Data preprocessing with Scikit-Learn Pipelines
-- Class imbalance handling using RandomOverSampler
-- Hyperparameter tuning with GridSearchCV
-- Model evaluation and comparison
-- Selection of the best model based primarily on Recall
-
----
-
-# 📂 Dataset
+## Dataset
 
 Dataset file:
 
@@ -30,485 +28,358 @@ Dataset file:
 Churn_Modelling.csv
 ```
 
-Dataset source:
+Source:
 
 Kaggle: <https://www.kaggle.com/datasets/aakash50897/churn-modellingcsv>
 
-## Dataset Size
+### Dataset size
 
-| Attribute | Value |
-|------------|---------|
-| Rows | 10,000 |
-| Columns | 14 |
-| Target Variable | Exited |
+- Rows: `10,000`
+- Columns: `14`
+- Target: `Exited`
 
-## Original Features
+### Original columns
 
-- RowNumber
-- CustomerId
-- Surname
-- CreditScore
-- Geography
-- Gender
-- Age
-- Tenure
-- Balance
-- NumOfProducts
-- HasCrCard
-- IsActiveMember
-- EstimatedSalary
-- Exited
+- `RowNumber`
+- `CustomerId`
+- `Surname`
+- `CreditScore`
+- `Geography`
+- `Gender`
+- `Age`
+- `Tenure`
+- `Balance`
+- `NumOfProducts`
+- `HasCrCard`
+- `IsActiveMember`
+- `EstimatedSalary`
+- `Exited`
 
-## Data Types
+### Data types
 
-- Object columns: Surname, Geography, Gender
-- Integer columns: 9
-- Float columns: 2
+- `object`: `Surname`, `Geography`, `Gender`
+- `int64`: 9 columns
+- `float64`: 2 columns
 
-## Data Quality
+### Data quality
 
-The dataset contains:
+Notebook output shows:
 
-- No missing values
-- No duplicate rows
+- no missing values;
+- no duplicate rows.
 
----
+## Current Notebook Workflow
 
-# 🎯 Project Objectives
+1. Install required libraries in Google Colab.
+2. Mount Google Drive and load `Churn_Modelling.csv`.
+3. Review schema, descriptive statistics, and sample records.
+4. Perform manual EDA with plots.
+5. Generate an automated HTML EDA report with `ydata_profiling`.
+6. Remove identifier columns.
+7. Split features and target.
+8. Build preprocessing pipelines.
+9. Split train/test with stratification.
+10. Use `RandomOverSampler` inside `ImbPipeline`.
+11. Run `GridSearchCV` for 4 models.
+12. Evaluate tuned models on the test set.
+13. Select the best model by `Recall`, then `F1-score`.
+14. Plot confusion matrix and ROC curve.
+15. Analyze feature importance of the best model.
+16. Export final comparison results to CSV.
 
-The notebook follows this workflow:
+## Data Loading
 
-1. Understand the data through EDA.
-2. Build preprocessing pipelines.
-3. Handle class imbalance.
-4. Optimize hyperparameters using GridSearchCV.
-5. Compare optimized models.
-6. Select the best model based on Recall.
-
----
-
-# ⚙️ Machine Learning Pipeline
-
-```text
-Dataset
-   ↓
-EDA
-   ↓
-Data Cleaning
-   ↓
-Feature Engineering
-   ↓
-Train/Test Split
-   ↓
-ColumnTransformer
-   ↓
-RandomOverSampler
-   ↓
-GridSearchCV
-   ↓
-Model Evaluation
-   ↓
-Best Model Selection
-```
-
----
-
-# 📊 Exploratory Data Analysis (EDA)
-
-## Missing Values
+The notebook is currently written for Google Colab:
 
 ```python
-df.isnull().sum()
+from google.colab import drive, files
+drive.mount('/content/drive')
+dataset_path = '/content/drive/MyDrive/ML/BTL/Datasets/Churn_Modelling.csv'
+df = pd.read_csv(dataset_path)
 ```
 
-Result:
+It also uses `files.download(...)` to download generated outputs.
 
-- No missing values found.
+## Exploratory Data Analysis
 
-## Duplicate Rows
+### Class distribution
 
-```python
-df.duplicated().sum()
-```
+Notebook output:
 
-Result:
-
-- No duplicate records.
-
-## Target Variable Analysis
-
-Class distribution:
-
-| Class | Samples |
-|---------|---------:|
-| Exited = 0 | 7963 |
-| Exited = 1 | 2037 |
+- `Exited = 0`: `7963`
+- `Exited = 1`: `2037`
 
 Class percentages:
 
-- Non-churn: 79.63%
-- Churn: 20.37%
+- non-churn: `79.63%`
+- churn: `20.37%`
 
-This indicates a significant class imbalance.
+This is why the notebook prioritizes recall-oriented evaluation.
 
-## Gender Analysis
+### EDA visuals currently included
 
-Churn rate:
+The notebook plots churn relationships for:
 
-- Female: 25.07%
-- Male: 16.46%
+- `Exited`
+- `Gender`
+- `Geography`
+- `Age`
+- `CreditScore`
+- `Balance`
+- `NumOfProducts`
+- `IsActiveMember`
+- `HasCrCard`
+- numeric correlation heatmap
 
-## Geography Analysis
+### Automated EDA report
 
-Churn rate:
+The notebook also generates:
 
-- Germany: 32.44%
-- Spain: 16.67%
-- France: 16.15%
-
-## Age Analysis
-
-Age distributions are visualized to compare churned and non-churned customers.
-
-## Credit Score Analysis
-
-Credit score distributions are examined to identify potential relationships with churn.
-
-## Balance Analysis
-
-Customer balances are analyzed to determine whether account balance affects churn probability.
-
-## Number of Products
-
-Churn rate by product count:
-
-| Products | Churn Rate |
-|----------|------------|
-| 4 | 100.00% |
-| 3 | 82.71% |
-| 1 | 27.71% |
-| 2 | 7.58% |
-
-## Activity Status
-
-Churn rate:
-
-- Inactive customers: 26.85%
-- Active customers: 14.27%
-
-## Credit Card Ownership
-
-Churn rate:
-
-- Without credit card: 20.81%
-- With credit card: 20.18%
-
-## Correlation Analysis
-
-A correlation heatmap is generated to inspect relationships among numerical variables and the target.
-
----
-
-# 🧹 Data Preprocessing
-
-## Removing Unnecessary Features
-
-The following columns are removed:
-
-- RowNumber
-- CustomerId
-- Surname
-
-Reason:
-
-- Identifier columns provide little predictive value.
-- They may introduce noise.
-
-## Feature and Target Split
-
-```python
-X = df_model.drop(columns=["Exited"])
-y = df_model["Exited"]
+```text
+bank_customer_churn_eda_report.html
 ```
 
-## Feature Types
-
-### Categorical Features
-
-- Geography
-- Gender
-
-### Numerical Features
-
-- CreditScore
-- Age
-- Tenure
-- Balance
-- NumOfProducts
-- HasCrCard
-- IsActiveMember
-- EstimatedSalary
-
----
-
-# 🔧 Feature Transformation
-
-## Numerical Features
+using:
 
 ```python
-StandardScaler()
+profile = ProfileReport(
+    df,
+    title="Bank Customer Churn - EDA Report",
+    explorative=True
+)
+profile.to_file("bank_customer_churn_eda_report.html")
 ```
 
-Used to standardize numerical variables.
+## Preprocessing
 
-## Categorical Features
+### Removed columns
+
+The notebook drops:
+
+- `RowNumber`
+- `CustomerId`
+- `Surname`
+
+### Features used for modeling
+
+After dropping identifiers:
+
+- `X` shape: `(10000, 10)`
+- `y` shape: `(10000,)`
+
+### Feature groups used in the current code
+
+Categorical features:
+
+- `Geography`
+- `Gender`
+- `HasCrCard`
+- `IsActiveMember`
+
+Numeric features:
+
+- `CreditScore`
+- `Age`
+- `Tenure`
+- `Balance`
+- `NumOfProducts`
+- `EstimatedSalary`
+
+This is an important change from earlier versions: `HasCrCard` and `IsActiveMember` are now treated as categorical features and one-hot encoded.
+
+### Transformer setup
 
 ```python
-OneHotEncoder(handle_unknown="ignore")
-```
+numeric_transformer = Pipeline(
+    steps=[("scaler", StandardScaler())]
+)
 
-Used to encode categorical variables safely.
+categorical_transformer = Pipeline(
+    steps=[("onehot", OneHotEncoder(handle_unknown="ignore"))]
+)
 
-## ColumnTransformer
-
-```python
-ColumnTransformer(
+preprocessor = ColumnTransformer(
     transformers=[
-        ("num", StandardScaler(), numeric_features),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features)
+        ("num", numeric_transformer, numeric_features),
+        ("cat", categorical_transformer, categorical_features)
     ]
 )
 ```
 
----
-
-# ✂️ Train/Test Split
+## Train/Test Split
 
 ```python
-train_test_split(
+X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
     test_size=0.2,
-    random_state=42,
+    random_state=RANDOM_STATE,
     stratify=y
 )
 ```
 
-Benefits:
+Notebook output:
 
-- 80% training data
-- 20% testing data
-- Preserves class distribution
+- train size: `(8000, 10)`
+- test size: `(2000, 10)`
+- train class ratio: class 0 = `0.79625`, class 1 = `0.20375`
+- test class ratio: class 0 = `0.7965`, class 1 = `0.2035`
 
----
+## Class Imbalance Handling
 
-# ⚖️ Handling Class Imbalance
-
-## Why Oversampling?
-
-The churn class represents only about 20% of the dataset.
-
-Without balancing, models may favor the majority class.
-
-## RandomOverSampler
-
-Pipeline structure:
+The notebook uses this structure for every tuned model:
 
 ```text
-Preprocessor
-      ↓
-RandomOverSampler
-      ↓
-Classifier
+preprocessor -> RandomOverSampler -> model
 ```
 
-Class distribution before oversampling:
+This keeps oversampling inside the training pipeline and avoids leakage into validation and test data.
 
-- Class 0: 6370
-- Class 1: 1630
+## Models Tuned With GridSearchCV
 
-After oversampling:
+The notebook tunes 4 models:
 
-- Class 0: 6370
-- Class 1: 6370
+1. `LogisticRegression`
+2. `DecisionTreeClassifier`
+3. `RandomForestClassifier`
+4. `GradientBoostingClassifier`
 
----
-
-# 🤖 Models Evaluated
-
-The notebook evaluates four classification algorithms:
-
-1. Logistic Regression
-2. Decision Tree Classifier
-3. Random Forest Classifier
-4. Gradient Boosting Classifier
-
----
-
-# 🔍 Hyperparameter Tuning
-
-## Cross Validation
+Cross-validation:
 
 ```python
-StratifiedKFold(
-    n_splits=5,
-    shuffle=True,
-    random_state=42
-)
+StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
 ```
 
-## Optimization Metric
+Optimization metric:
 
 ```python
 scoring="recall"
 ```
 
-Recall is prioritized because missing churn customers is more costly than generating some false positives.
+### Best hyperparameters from the notebook output
 
----
+#### Logistic Regression
 
-# 📈 Best Hyperparameters
+- `model__C = 1`
+- `model__solver = 'lbfgs'`
+- `model__class_weight = None`
+- Best CV Recall: `0.6901840490797546`
 
-## Logistic Regression
+#### Decision Tree
 
-Best Recall (CV):
+- `model__max_depth = 5`
+- `model__min_samples_split = 2`
+- `model__min_samples_leaf = 4`
+- `model__class_weight = None`
+- Best CV Recall: `0.7539877300613497`
 
-```text
-0.688957
-```
+#### Random Forest
 
-## Decision Tree
+- `model__n_estimators = 200`
+- `model__max_depth = 5`
+- `model__min_samples_split = 2`
+- `model__class_weight = None`
+- Best CV Recall: `0.7049079754601226`
 
-Best Recall (CV):
+#### Gradient Boosting
 
-```text
-0.753374
-```
+- `model__n_estimators = 100`
+- `model__learning_rate = 0.1`
+- `model__max_depth = 2`
+- Best CV Recall: `0.7398773006134969`
 
-## Random Forest
+## Final Test Results
 
-Best Recall (CV):
-
-```text
-0.728834
-```
-
-## Gradient Boosting
-
-Best Recall (CV):
-
-```text
-0.739877
-```
-
----
-
-# 🏆 Final Test Results
+The notebook sorts final results by `Recall` descending, then `F1-score` descending.
 
 | Model | Accuracy | Precision | Recall | F1-score | ROC-AUC |
 |---|---:|---:|---:|---:|---:|
-| Gradient Boosting | 0.8030 | 0.510638 | 0.766585 | 0.612967 | 0.865834 |
-| Decision Tree | 0.7740 | 0.466165 | 0.761671 | 0.578358 | 0.847372 |
-| Random Forest | 0.7875 | 0.485669 | 0.749386 | 0.589372 | 0.854839 |
-| Logistic Regression | 0.7160 | 0.391069 | 0.710074 | 0.504363 | 0.778103 |
+| Gradient Boosting | 0.803000 | 0.510638 | 0.766585 | 0.612967 | 0.865834 |
+| Decision Tree | 0.774000 | 0.466165 | 0.761671 | 0.578358 | 0.847119 |
+| Logistic Regression | 0.716000 | 0.391069 | 0.710074 | 0.504363 | 0.778086 |
+| Random Forest | 0.793000 | 0.493892 | 0.695332 | 0.577551 | 0.852518 |
 
----
+## Best Model
 
-# 🥇 Best Model
+Selected model:
 
-## Gradient Boosting Classifier
+- `Gradient Boosting`
 
-Reasons:
+Reason:
 
-- Highest Recall: 0.766585
-- Highest F1-score: 0.612967
-- Highest ROC-AUC: 0.865834
+- highest `Recall`: `0.766585`
+- highest `F1-score`: `0.612967`
+- highest `ROC-AUC`: `0.865834`
 
-Classification Report:
+Classification report stored in the notebook:
 
-### Class 0
+- class `0`: precision `0.93`, recall `0.81`, f1-score `0.87`
+- class `1`: precision `0.51`, recall `0.77`, f1-score `0.61`
+- overall accuracy: `0.80`
 
-- Precision: 0.93
-- Recall: 0.81
-- F1-score: 0.87
+## Feature Importance
 
-### Class 1
+The notebook includes a feature-importance section for the selected best model.
 
-- Precision: 0.51
-- Recall: 0.77
-- F1-score: 0.61
+Top features shown in the stored output:
 
-Overall Accuracy:
+1. `Age` - `0.432889`
+2. `NumOfProducts` - `0.316866`
+3. `Balance` - `0.067476`
+4. `Geography_Germany` - `0.061781`
+5. `IsActiveMember_0` - `0.051158`
 
-```text
-80.3%
-```
+This is another change from the older README: feature-importance analysis is now part of the notebook workflow.
 
----
+## Output Files
 
-# 📁 Output Files
-
-The notebook exports:
+The current notebook explicitly exports:
 
 ```python
-final_results_df.to_csv(
-    "gridsearch_model_results.csv",
-    index=False
-)
+final_results_df.to_csv("gridsearch_model_results.csv", index=False)
 ```
 
----
-
-# 💡 Advantages
-
-- Comprehensive EDA
-- Proper preprocessing pipeline
-- Handles class imbalance correctly
-- Prevents data leakage
-- Uses Stratified Cross Validation
-- Hyperparameter optimization
-- Multiple model comparison
-- Exportable results
-
----
-
-# ⚠️ Limitations
-
-## Google Colab Dependency
-
-Some code is specific to Google Colab:
+It also downloads:
 
 ```python
-drive.mount()
-files.download()
+files.download("gridsearch_model_results.csv")
 ```
 
-## Default Classification Threshold
+Additional generated file:
 
-The model uses the default threshold of 0.5.
+- `bank_customer_churn_eda_report.html`
 
-Threshold tuning may further improve business performance.
+## Libraries Used
 
-## RandomOverSampler Risk
+Installed in the notebook:
 
-RandomOverSampler duplicates minority samples and may increase overfitting risk.
+```bash
+pip install kaggle ydata-profiling xgboost imbalanced-learn -q
+```
 
-Advanced techniques such as SMOTE could be explored.
+Main imported libraries include:
 
----
+- `numpy`
+- `pandas`
+- `matplotlib`
+- `seaborn`
+- `scikit-learn`
+- `imbalanced-learn`
+- `ydata-profiling`
+- `xgboost`
 
-# 🚀 How to Run
+Note: `xgboost` is installed/imported, but the current notebook version does not train an XGBoost model.
 
-## Google Colab
+## Limitations
 
-1. Upload the notebook.
-2. Upload or mount `Churn_Modelling.csv`.
-3. Verify dataset path.
-4. Run all cells.
+- The notebook depends on Google Colab utilities such as `drive.mount()` and `files.download()`.
+- It does not include a baseline-training section anymore; it goes directly to `GridSearchCV`.
+- `RandomOverSampler` may increase overfitting risk because it duplicates minority samples.
+- The classification threshold is still the default `0.5`.
 
-## Local Environment
+## How to Run Locally
 
-Replace the loading code with:
+To run outside Colab, replace the loading step with:
 
 ```python
 import pandas as pd
@@ -516,64 +387,22 @@ import pandas as pd
 df = pd.read_csv("Churn_Modelling.csv")
 ```
 
-Remove:
+You should also remove or replace:
 
 ```python
-drive.mount()
-files.download()
+from google.colab import drive, files
+drive.mount('/content/drive')
+files.download(...)
 ```
 
----
-
-# 📦 Required Libraries
-
-```bash
-pip install pandas numpy matplotlib seaborn scikit-learn imbalanced-learn xgboost kaggle ydata-profiling
-```
-
----
-
-# 📋 Project Workflow Summary
-
-1. Load dataset
-2. Check data quality
-3. Perform EDA
-4. Remove unnecessary columns
-5. Split X and y
-6. Apply preprocessing
-7. Train/test split
-8. Apply RandomOverSampler
-9. Tune models using GridSearchCV
-10. Evaluate models
-11. Select Gradient Boosting
-12. Export results
-
----
-
-# 🔮 Future Improvements
-
-Potential improvements:
-
-- Threshold optimization
-- SHAP explainability
-- SMOTE and SMOTENC
-- XGBoost optimization
-- Ensemble methods
-- Business cost-based evaluation
-- Deployment using Streamlit or Flask
-
----
-
-# 👨‍💻 Author
+## Author
 
 ```text
 Author : Nguyen Thi Thao My
 Project: Bank Customer Churn Classification
 ```
 
----
-
-# 📜 License
+## License
 
 ```text
 MIT License
